@@ -15,19 +15,22 @@ insert into users (username, password, email, profile_pic) values ('admin', '123
 create table products (
     id int primary key auto_increment,
     name varchar(50) not null,
-    image varchar(250) not null
+    image varchar(250) not null,
+    totalRate float default 0,
+    totalVotes int default 0
 );
 
-insert into products (name, image) values ('CalvinKlein One', '/UT6_SP1_RamírezLucesCésarMiguel/img/product1.jpg');
+insert into products (name, image, totalRate, totalVotes) values ('Calvin Klein One', '/UT6_SP1_RamírezLucesCésarMiguel/img/product1.jpg', 1, 1);
 
 create table votes(
     id int primary key auto_increment,
-    userRate float default 0,
-    totalRate int not null,
+    rate int default 0,
     productId int not null,
     userId int not null,
     foreign key (productId) references products(id),
-    foreign key (userId) references users(id)
+    foreign key (userId) references users(id),
+    unique (productId, userId)
 );
 
-insert into votes (userRate, totalRate, productId, userId) values (1, 1, 1, 1);
+insert into votes (rate, productId, userId) values (1, 1, 1);
+insert into votes (rate, productId, userId) values (2, 1, 1);

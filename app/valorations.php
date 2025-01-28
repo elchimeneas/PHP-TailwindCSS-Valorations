@@ -56,9 +56,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['vote'], $_POST['produ
             $errors[] = 'Ya has votado este producto.';
         } else {
             // Insertamos un nuevo voto porque no existe ninguno previo
-            $sql_insert_vote = "INSERT INTO votes (userRate, totalRate, productId, userId) VALUES (?, ?, ?, ?)";
+            $sql_insert_vote = "INSERT INTO votes (rate, productId, userId) VALUES (?, ?, ?)";
             $stmt_insert_vote = $db_PDO->prepare($sql_insert_vote);
-            $stmt_insert_vote->execute([$userRate, $userRate, $productId, $userId]);
+            $stmt_insert_vote->execute([$userRate, $productId, $userId]);
+
+            $sql_update_totalRate = "UPDATE products SET totalRate = totalRate + ? WHERE id = ?";
+            $smtm_updateTotalRate = $db_PDO->prepare($sql_update_totalRate);
+            $smtm_updateTotalRate->execute([$userRate, $productId]);
 
             echo 'Voto registrado correctamente.';
         }
@@ -83,6 +87,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['vote'], $_POST['produ
     <link rel="stylesheet" href="../css/style.css">
     <link rel="shortcut icon" href="../img/logo.png" type="image/x-icon">
     <script src="https://kit.fontawesome.com/52ac892b93.js" crossorigin="anonymous"></script>
+    <script src="./script.js"></script>
     <title>VALORATIONS — Valoraciones de productos</title>
 </head>
 
@@ -110,7 +115,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['vote'], $_POST['produ
                 <th>ID</th>
                 <th>Product Image</th>
                 <th>Name</th>
-                <th>All valorations</th>
+                <th>Average</th>
                 <th>Your valoration</th>
                 <th>Vote</th>
             </thead>
@@ -128,26 +133,47 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['vote'], $_POST['produ
                                 <td><?php echo $product['id']; ?></td>
                                 <td class="flex flex-col items-center justify-center"><?php echo "<img src='" . $product['image'] . "' alt='Product image' class='w-[100px] text-center'>"; ?></td>
                                 <td><?php echo $product['name']; ?></td>
-                                <td><?php
+                                <td><?php 
+                                 try {
 
-                                    try {
-                                        $sql_product_vote = "SELECT * FROM votes WHERE (productId, userId) = (?, ?)";
-                                        $gsent_user_vote = $db_PDO->prepare($sql_product_vote);
-                                        $gsent_user_vote->execute([$product['id'], $_SESSION['userId']]);
+                                    $sql_user_vote = 'SELECT totalRate FROM products WHERE id = ?';
+                                    $gsent_user = $db_PDO->prepare($sql_user_vote);
+                                    $gsent_user->execute([$product['id']]);
 
-                                        $result_vote = $gsent_user_vote->fetch(PDO::FETCH_ASSOC);
+                                    $result = $gsent_user->fetch(PDO::FETCH_ASSOC);
 
-                                        if ($result_vote) {
-                                            echo $result_vote['totalRate'];
-                                        } else {
-                                            echo "<script>console.log('Error: No se encontró la valoración total del producto.');</script>";
-                                        }
-                                    } catch (PDOException $e) {
-                                        echo "<script>console.log('Error: " . $e->getMessage() . "');</script>";
+                                    if($result) {
+
+                                        
+
+                                    } else {
+                                        echo "You're not rated yet";
                                     }
 
-                                    ?></td>
-                                <td>You've not voted yet</td>
+                                } catch(PDOException $e) {
+                                    die('Error' . $e->getMessage());
+                                }
+
+                                ?></td>
+                                <td><?php 
+                                    try {
+
+                                        $sql_user_vote = 'SELECT rate FROM votes WHERE (userId, productId) = (?, ?)';
+                                        $gsent_user = $db_PDO->prepare($sql_user_vote);
+                                        $gsent_user->execute([$_SESSION['userId'], $product['id']]);
+
+                                        $result = $gsent_user->fetch(PDO::FETCH_ASSOC);
+
+                                        if($result) {
+                                            echo $result['rate'];
+                                        } else {
+                                            echo "You're not rated yet";
+                                        }
+
+                                    } catch(PDOException $e) {
+                                        die('Error' . $e->getMessage());
+                                    }
+                                ?></td>
                                 <td>
                                     <form action="" method="POST" class="flex gap-4 items-center justify-center">
                                         <div class="rating flex gap-1 text-yellow cursor-pointer" data-product-id="<?php echo $product['id']; ?>">
@@ -176,6 +202,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['vote'], $_POST['produ
                 }
 
                 ?>
+
+                <p id="response"></p>
             </tbody>
         </table>
     </section>

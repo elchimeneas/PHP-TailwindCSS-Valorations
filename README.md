@@ -28,6 +28,7 @@ Antes de comenzar, asegúrate de tener instalados los siguientes programas y her
 ├── app/                # Archivos PHP
 │   ├── db.php          # Conexión a la base de datos
 │   ├── index.php       # Archivo principal
+│   ├── script.js       # Script JS para actualizar la valoracion de un producto
 │   └── valorations.php # Panel de valoraciones de productos
 ├── css/                # Archivos CSS
 │   ├── style.css       # Estilos adicionales
