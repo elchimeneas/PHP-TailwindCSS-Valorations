@@ -1,6 +1,10 @@
 <?php
 session_start();
 
+if (!isset($_SESSION['isLogged'])) {
+    $_SESSION['isLogged'] = 'unlogged';
+}
+
 include_once('db.php');
 
 if (isset($_SESSION['isLogged']) && $_SESSION['isLogged'] === 'unlogged') {
