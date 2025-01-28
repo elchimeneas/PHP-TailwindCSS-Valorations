@@ -1,0 +1,38 @@
+/* JUST A LITTLE THINGS */
+
+.header_link::before {
+    content: "";
+    background-color: #F9C400;
+    height: 3px;
+    width: 0;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    transition: all 0.5s ease-in-out;
+}
+
+.header_link:hover::before {
+    width: 100%;
+}
+
+.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.star {
+    display: inline-block;
+    width: 24px;
+    height: 24px;
+    background: #e4e5e9; /* Gris por defecto */
+    clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+    cursor: pointer;
+}
+
+.star.filled {
+    background: #ffc107; /* Amarillo */
+}
+
+.star.half-filled {
+    background: linear-gradient(to right, #ffc107 50%, #e4e5e9 50%);
+}
