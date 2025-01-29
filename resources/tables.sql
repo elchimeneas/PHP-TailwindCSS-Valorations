@@ -31,6 +31,3 @@ create table votes(
     foreign key (userId) references users(id),
     unique (productId, userId)
 );
-
-insert into votes (rate, productId, userId) values (1, 1, 1);
-insert into votes (rate, productId, userId) values (2, 1, 1);

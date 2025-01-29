@@ -133,29 +133,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['vote'], $_POST['produ
                                 <td><?php echo $product['id']; ?></td>
                                 <td class="flex flex-col items-center justify-center"><?php echo "<img src='" . $product['image'] . "' alt='Product image' class='w-[100px] text-center'>"; ?></td>
                                 <td><?php echo $product['name']; ?></td>
-                                <td><?php 
-                                 try {
+                                <td id="average-<?php echo $product['id']; ?>">
+                                    <?php echo $product['totalRate'] ?? "No ratings yet"; ?>
+                                </td>
 
-                                    $sql_user_vote = 'SELECT totalRate FROM products WHERE id = ?';
-                                    $gsent_user = $db_PDO->prepare($sql_user_vote);
-                                    $gsent_user->execute([$product['id']]);
-
-                                    $result = $gsent_user->fetch(PDO::FETCH_ASSOC);
-
-                                    if($result) {
-
-                                        
-
-                                    } else {
-                                        echo "You're not rated yet";
-                                    }
-
-                                } catch(PDOException $e) {
-                                    die('Error' . $e->getMessage());
-                                }
-
-                                ?></td>
-                                <td><?php 
+                                <td><?php
                                     try {
 
                                         $sql_user_vote = 'SELECT rate FROM votes WHERE (userId, productId) = (?, ?)';
@@ -164,16 +146,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['vote'], $_POST['produ
 
                                         $result = $gsent_user->fetch(PDO::FETCH_ASSOC);
 
-                                        if($result) {
+                                        if ($result) {
                                             echo $result['rate'];
                                         } else {
                                             echo "You're not rated yet";
                                         }
-
-                                    } catch(PDOException $e) {
+                                    } catch (PDOException $e) {
                                         die('Error' . $e->getMessage());
                                     }
-                                ?></td>
+                                    ?></td>
                                 <td>
                                     <form action="" method="POST" class="flex gap-4 items-center justify-center">
                                         <div class="rating flex gap-1 text-yellow cursor-pointer" data-product-id="<?php echo $product['id']; ?>">
@@ -188,22 +169,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['vote'], $_POST['produ
                                 </td>
                             </tr>
                             <?php if (!empty($errors)): ?>
-                                    <ul>
-                                        <?php foreach ($errors as $error): ?>
-                                            <li><?php echo $error ?></li>
-                                    </ul>
-                            <?php $errors = [];
-                                        endforeach;
-                                    endif; ?>
-                <?php endforeach;
+                                <ul>
+                                    <?php foreach ($errors as $error): ?>
+                                        <li><?php echo $error ?></li>
+                                </ul>
+                        <?php $errors = [];
+                                    endforeach;
+                                endif; ?>
+            <?php endforeach;
                     endif;
                 } catch (PDOException $e) {
                     echo "<script>console.log('Error: '" . $e->getMessage() . " );</script>";
                 }
 
-                ?>
+            ?>
 
-                <p id="response"></p>
+            <p id="response"></p>
             </tbody>
         </table>
     </section>

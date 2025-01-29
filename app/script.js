@@ -1,22 +1,59 @@
-function getData(e) {
-    e.preventDefault();
+document.addEventListener("DOMContentLoaded", () => {
+    const forms = document.querySelectorAll(".vote-form");
 
-    var vote = document.getElementById("voteInput-" + e.target.dataset.productId).value;
-    var productId = e.target.dataset.productId;
-    var response = document.getElementById("response");
+    forms.forEach((form) => {
+        const productId = form.dataset.productId;
+        const stars = form.querySelectorAll(".rating i");
+        const voteInput = form.querySelector(".vote-input");
+        const userVoteCell = document.getElementById(`user-vote-${productId}`);
+        const averageCell = document.getElementById(`average-${productId}`);
 
-    fetch("localhost/UT6_SP1_RamírezLucesCésarMiguel/app/valorations.php", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/x-www-form-urlencoded"
-        },
-        body: "vote=" + vote + "&productId=" + productId
-    })
-        .then(response => response.text())
-        .then(data => {
-            console.log(data);
-        })
-        .catch(error => {
-            console.error(error);
+        let currentVote = 0;
+
+        stars.forEach((star, index) => {
+            star.addEventListener("mousemove", (event) => {
+                highlightStars(stars, index + 1);
+            });
+
+            star.addEventListener("click", () => {
+                currentVote = index + 1;
+                voteInput.value = currentVote;
+            });
         });
-}
+
+        form.addEventListener("mouseleave", () => {
+            highlightStars(stars, currentVote);
+        });
+
+        form.addEventListener("submit", async (event) => {
+            event.preventDefault();
+
+            if (currentVote === 0) {
+                alert("Por favor, selecciona una puntuación.");
+                return;
+            }
+
+            const response = await fetch("vote.php", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ vote: currentVote, productId })
+            });
+
+            const result = await response.json();
+
+            if (result.error) {
+                alert(result.error);
+            } else {
+                userVoteCell.textContent = result.userVote;
+                averageCell.textContent = result.newAverage;
+                form.innerHTML = "<p class='text-green-500 font-bold'>¡Gracias por votar!</p>";
+            }
+        });
+    });
+
+    function highlightStars(stars, value) {
+        stars.forEach((star, index) => {
+            star.style.color = index < value ? "#ffc107" : "#e4e5e9";
+        });
+    }
+});
