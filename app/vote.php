@@ -4,6 +4,8 @@ include_once('db.php');
 
 header('Content-Type: application/json');
 
+$errors = [];
+
 if (!isset($_SESSION['isLogged']) || $_SESSION['isLogged'] !== 'logged' || !isset($_SESSION['userId'])) {
     echo json_encode(['error' => 'No estás autenticado.']);
     exit;
@@ -11,8 +13,8 @@ if (!isset($_SESSION['isLogged']) || $_SESSION['isLogged'] !== 'logged' || !isse
 
 $userId = $_SESSION['userId'];
 $data = json_decode(file_get_contents('php://input'), true);
-$productId = filter_var($data['productId'], FILTER_VALIDATE_INT);
-$userRate = filter_var($data['vote'], FILTER_VALIDATE_FLOAT);
+$productId = filter_var($_POST['productId'], FILTER_VALIDATE_INT);
+$userRate = filter_var($_POST['vote'], FILTER_VALIDATE_FLOAT);
 
 if (!$productId || !$userRate || $userRate < 0 || $userRate > 3) {
     echo json_encode(['error' => 'Datos inválidos.']);
