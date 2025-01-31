@@ -14,10 +14,9 @@ try {
         PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION, // Activa el modo de errores para PDO.
         PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC, // Define el modo de obtención predeterminado.
     ]);
-    echo "<script>console.log('DATABASE: Connected succesfully to $db_name' );</script>";
     
 } catch (PDOException $e) {
-    echo "<script>console.log('Error: '" . $e->getMessage() . " );</script>";
+    die($e->getMessage());
 }
 
 

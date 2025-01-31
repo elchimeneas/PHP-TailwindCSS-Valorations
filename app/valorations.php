@@ -7,6 +7,7 @@ if (!isset($_SESSION['isLogged'])) {
 
 include_once('db.php');
 
+
 if (isset($_SESSION['isLogged']) && $_SESSION['isLogged'] === 'unlogged') {
     header('location: ./index.php');
     exit;
@@ -33,43 +34,7 @@ if ($_SESSION['isLogged'] === 'logged' && isset($_SESSION['username'])) {
     }
 }
 
-$errors = [];
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['vote'], $_POST['productId'])) {
-    // Validamos y sanitizamos los datos
-    $userId = $_SESSION['userId'];
-    $productId = filter_var($_POST['productId'], FILTER_VALIDATE_INT);
-    $userRate = filter_var($_POST['vote'], FILTER_VALIDATE_FLOAT);
-
-    if (!$productId || !$userRate || $userRate < 0 || $userRate > 3) {
-        header('location: ' . $_SERVER['PHP_SELF']);
-        $errors[] = 'Datos del voto inválidos';
-    }
-
-    try {
-        // Comprobamos si ya existe un voto del usuario para este producto
-        $sql_check_vote = "SELECT * FROM votes WHERE productId = ? AND userId = ?";
-        $stmt_check_vote = $db_PDO->prepare($sql_check_vote);
-        $stmt_check_vote->execute([$productId, $userId]);
-
-        if ($stmt_check_vote->rowCount() > 0) {
-            $errors[] = 'Ya has votado este producto.';
-        } else {
-            // Insertamos un nuevo voto porque no existe ninguno previo
-            $sql_insert_vote = "INSERT INTO votes (rate, productId, userId) VALUES (?, ?, ?)";
-            $stmt_insert_vote = $db_PDO->prepare($sql_insert_vote);
-            $stmt_insert_vote->execute([$userRate, $productId, $userId]);
-
-            $sql_update_totalRate = "UPDATE products SET totalRate = totalRate + ? WHERE id = ?";
-            $smtm_updateTotalRate = $db_PDO->prepare($sql_update_totalRate);
-            $smtm_updateTotalRate->execute([$userRate, $productId]);
-
-            echo 'Voto registrado correctamente.';
-        }
-    } catch (PDOException $e) {
-        die('Error en la base de datos: ' . $e->getMessage());
-    }
-}
 
 
 ?>
@@ -87,7 +52,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['vote'], $_POST['produ
     <link rel="stylesheet" href="../css/style.css">
     <link rel="shortcut icon" href="../img/logo.png" type="image/x-icon">
     <script src="https://kit.fontawesome.com/52ac892b93.js" crossorigin="anonymous"></script>
-    <script src="./script.js"></script>
     <title>VALORATIONS — Valoraciones de productos</title>
 </head>
 
@@ -133,11 +97,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['vote'], $_POST['produ
                                 <td><?php echo $product['id']; ?></td>
                                 <td class="flex flex-col items-center justify-center"><?php echo "<img src='" . $product['image'] . "' alt='Product image' class='w-[100px] text-center'>"; ?></td>
                                 <td><?php echo $product['name']; ?></td>
-                                <td id="average-<?php echo $product['id']; ?>">
-                                    <?php echo $product['totalRate'] ?? "No ratings yet"; ?>
+                                <td id="averageRate-<?php echo $product['id']; ?>">
+                                    Average: <?php
+                                            echo ($product['totalVotes'] > 0)
+                                                ? round($product['totalRate'] / $product['totalVotes'], 2)
+                                                : "Sin votos";
+                                            ?>
                                 </td>
-
-                                <td><?php
+                                <td id="userVote-<?php echo $product['id']; ?>"><?php
                                     try {
 
                                         $sql_user_vote = 'SELECT rate FROM votes WHERE (userId, productId) = (?, ?)';
@@ -146,11 +113,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['vote'], $_POST['produ
 
                                         $result = $gsent_user->fetch(PDO::FETCH_ASSOC);
 
-                                        if ($result) {
-                                            echo $result['rate'];
-                                        } else {
-                                            echo "You're not rated yet";
-                                        }
+                                        echo $result ? $result['rate'] : "You haven't rated yet";
                                     } catch (PDOException $e) {
                                         die('Error' . $e->getMessage());
                                     }
@@ -164,98 +127,92 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['vote'], $_POST['produ
                                         </div>
                                         <input type="hidden" name="vote" id="voteInput-<?php echo $product['id']; ?>" value="">
                                         <input type="hidden" name="productId" value="<?php echo $product['id']; ?>">
-                                        <button type="submit" name="voted" class="py-[5px] px-[10px] bg-dark-gray text-white font-bold rounded shadow-xl">VOTE</button>
+                                        <button type="submit" id="vote-button" name="voted" class="vote-button py-[5px] px-[10px] bg-dark-gray text-white font-bold rounded shadow-xl">VOTE</button>
                                     </form>
                                 </td>
                             </tr>
-                            <?php if (!empty($errors)): ?>
-                                <ul>
-                                    <?php foreach ($errors as $error): ?>
-                                        <li><?php echo $error ?></li>
-                                </ul>
-                        <?php $errors = [];
-                                    endforeach;
-                                endif; ?>
-            <?php endforeach;
+                <?php endforeach;
                     endif;
                 } catch (PDOException $e) {
                     echo "<script>console.log('Error: '" . $e->getMessage() . " );</script>";
                 }
 
-            ?>
-
-            <p id="response"></p>
+                ?>
             </tbody>
         </table>
+        <p id="response"></p>
     </section>
+</body>
 
-    <script>
-        const ratings = document.querySelectorAll('.rating');
+<script>
+    const ratings = document.querySelectorAll(".rating");
 
-        ratings.forEach(rating => {
-            const stars = rating.querySelectorAll('i'); // Estrellas para este producto
-            const voteInput = document.getElementById(`voteInput-${rating.dataset.productId}`); // Campo oculto para este producto
+    ratings.forEach((rating) => {
+        const stars = rating.querySelectorAll("i"); // Estrellas para este producto
+        const voteInput = document.getElementById(
+            `voteInput-${rating.dataset.productId}`
+        ); // Campo oculto para este producto
 
-            let currentVote = 0; // Valor actual del voto
+        let currentVote = 0; // Valor actual del voto
 
-            stars.forEach((star, index) => {
-                // Detectar posición del ratón dentro de la estrella
-                star.addEventListener('mousemove', (event) => {
-                    const rect = star.getBoundingClientRect();
-                    const mouseX = event.clientX - rect.left; // Posición del ratón dentro de la estrella
-                    const starWidth = rect.width; // Ancho total de la estrella
+        stars.forEach((star, index) => {
+            // Detectar posición del ratón dentro de la estrella
+            star.addEventListener("mousemove", (event) => {
+                const rect = star.getBoundingClientRect();
+                const mouseX = event.clientX - rect.left; // Posición del ratón dentro de la estrella
+                const starWidth = rect.width; // Ancho total de la estrella
 
-                    // Determinar si se llena media o completa
-                    let value = index + 1; // Valor base (1, 2, 3 según la posición)
-                    if (mouseX < starWidth / 2) {
-                        value -= 0.5; // Media estrella
-                    }
+                // Determinar si se llena media o completa
+                let value = index + 1; // Valor base (1, 2, 3 según la posición)
+                if (mouseX < starWidth / 2) {
+                    value -= 0.5; // Media estrella
+                }
 
-                    highlightStars(rating, value); // Resaltar estrellas según el valor
-                });
-
-                // Guardar el valor al hacer clic
-                star.addEventListener('click', (event) => {
-                    const rect = star.getBoundingClientRect();
-                    const mouseX = event.clientX - rect.left;
-                    const starWidth = rect.width;
-
-                    let value = index + 1;
-                    if (mouseX < starWidth / 2) {
-                        value -= 0.5;
-                    }
-
-                    currentVote = value; // Guardar el voto actual
-                    voteInput.value = currentVote; // Establecer el valor en el campo oculto
-                });
+                highlightStars(rating, value); // Resaltar estrellas según el valor
             });
 
-            // Resetear las estrellas al salir del área
-            rating.addEventListener('mouseleave', () => {
-                highlightStars(rating, currentVote); // Resaltar con el voto actual
+            // Guardar el valor al hacer clic
+            star.addEventListener("click", (event) => {
+                const rect = star.getBoundingClientRect();
+                const mouseX = event.clientX - rect.left;
+                const starWidth = rect.width;
+
+                let value = index + 1;
+                if (mouseX < starWidth / 2) {
+                    value -= 0.5;
+                }
+
+                currentVote = value; // Guardar el voto actual
+                voteInput.value = currentVote; // Establecer el valor en el campo oculto
             });
         });
 
-        // Función para resaltar las estrellas según el valor
-        function highlightStars(rating, value) {
-            const stars = rating.querySelectorAll('i');
-            stars.forEach((star, index) => {
-                star.style.color = '#e4e5e9'; // Resetear el color (gris)
+        // Resetear las estrellas al salir del área
+        rating.addEventListener("mouseleave", () => {
+            highlightStars(rating, currentVote); // Resaltar con el voto actual
+        });
+    });
 
-                if (index + 1 <= value) {
-                    star.style.color = '#ffc107'; // Estrella completa (amarilla)
-                } else if (index + 0.5 === value) {
-                    // Estrella a la mitad
-                    star.style.background = `linear-gradient(to right, #ffc107 50%, #e4e5e9 50%)`;
-                    star.style.webkitBackgroundClip = 'text';
-                    star.style.color = 'transparent';
-                } else {
-                    star.style.background = ''; // Resetear fondo
-                }
-            });
-        }
-    </script>
+    // Función para resaltar las estrellas según el valor
+    function highlightStars(rating, value) {
+        const stars = rating.querySelectorAll("i");
+        stars.forEach((star, index) => {
+            star.style.color = "#e4e5e9"; // Resetear el color (gris)
 
-</body>
+            if (index + 1 <= value) {
+                star.style.color = "#ffc107"; // Estrella completa (amarilla)
+            } else if (index + 0.5 === value) {
+                // Estrella a la mitad
+                star.style.background = `linear-gradient(to right, #ffc107 50%, #e4e5e9 50%)`;
+                star.style.webkitBackgroundClip = "text";
+                star.style.color = "transparent";
+            } else {
+                star.style.background = ""; // Resetear fondo
+            }
+        });
+    }
+</script>
+
+<script src="./script.js"></script>
 
 </html>

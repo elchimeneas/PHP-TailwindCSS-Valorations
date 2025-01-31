@@ -1,59 +1,61 @@
-document.addEventListener("DOMContentLoaded", () => {
-    const forms = document.querySelectorAll(".vote-form");
+document.querySelectorAll('.vote-button').forEach(button => {
+    button.addEventListener('click', async function(event) {
+        event.preventDefault(); // Evita el envío tradicional del formulario
 
-    forms.forEach((form) => {
-        const productId = form.dataset.productId;
-        const stars = form.querySelectorAll(".rating i");
-        const voteInput = form.querySelector(".vote-input");
-        const userVoteCell = document.getElementById(`user-vote-${productId}`);
-        const averageCell = document.getElementById(`average-${productId}`);
+        const form = this.closest('form');
+        const formData = new FormData(form);
+        const voteInput = form.querySelector('input[name="vote"]');
+        const productId = formData.get("productId");
+        const averageRateElement = document.getElementById(`averageRate-${productId}`);
+        const responseDiv = document.getElementById('response') || createResponseDiv(form);
 
-        let currentVote = 0;
+        // Validación de si se seleccionó un voto
+        if (!voteInput.value) {
+            responseDiv.innerHTML = '<p style="color: red;">Por favor, selecciona una estrella antes de votar.</p>';
+            return;
+        }
 
-        stars.forEach((star, index) => {
-            star.addEventListener("mousemove", (event) => {
-                highlightStars(stars, index + 1);
+        try {
+            const response = await fetch('vote.php', {
+                method: 'POST',
+                body: formData
             });
 
-            star.addEventListener("click", () => {
-                currentVote = index + 1;
-                voteInput.value = currentVote;
-            });
-        });
+            const result = await response.json(); // Obtiene la respuesta como JSON
 
-        form.addEventListener("mouseleave", () => {
-            highlightStars(stars, currentVote);
-        });
+            console.log('Respuesta del servidor:', result);  // Depurar la respuesta del servidor
 
-        form.addEventListener("submit", async (event) => {
-            event.preventDefault();
+            if (result.success) {
+                responseDiv.innerHTML = `<p style="color: green;">${result.message}</p>`;
 
-            if (currentVote === 0) {
-                alert("Por favor, selecciona una puntuación.");
-                return;
-            }
+                // Verifica que el elemento promedio exista antes de intentar actualizarlo
+                if (averageRateElement) {
+                    console.log("Elemento encontrado:", averageRateElement);  // Verifica que se encuentre el elemento
+                    averageRateElement.innerText = `Average: ${result.averageRate}`;
+                } else {
+                    console.log("The average element was not found.");
+                }
 
-            const response = await fetch("vote.php", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ vote: currentVote, productId })
-            });
-
-            const result = await response.json();
-
-            if (result.error) {
-                alert(result.error);
+                    // Actualizar la valoración del usuario
+                const userVoteElement = document.getElementById(`userVote-${productId}`);
+                if (userVoteElement) {
+                    userVoteElement.innerText = result.userVote;
+                }
             } else {
-                userVoteCell.textContent = result.userVote;
-                averageCell.textContent = result.newAverage;
-                form.innerHTML = "<p class='text-green-500 font-bold'>¡Gracias por votar!</p>";
+                responseDiv.innerHTML = `<p style="color: red;">${result.message}</p>`;
             }
-        });
+        } catch (error) {
+            console.error('Error en la solicitud:', error);
+            responseDiv.innerHTML = '<p style="color: red;">Hubo un problema al procesar tu voto.</p>';
+        }
     });
-
-    function highlightStars(stars, value) {
-        stars.forEach((star, index) => {
-            star.style.color = index < value ? "#ffc107" : "#e4e5e9";
-        });
-    }
 });
+
+// Función para crear el div de respuesta si no existe
+function createResponseDiv(form) {
+    const responseDiv = document.createElement('div');
+    responseDiv.id = 'response';
+    responseDiv.style.marginTop = '10px';
+    form.appendChild(responseDiv);
+    return responseDiv;
+}

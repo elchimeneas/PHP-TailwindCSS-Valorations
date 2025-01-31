@@ -29,11 +29,13 @@ Antes de comenzar, asegúrate de tener instalados los siguientes programas y her
 │   ├── db.php          # Conexión a la base de datos
 │   ├── index.php       # Archivo principal
 │   ├── script.js       # Script JS para actualizar la valoracion de un producto
+│   ├── vote.php       # Manejo de votos de los productos.
 │   └── valorations.php # Panel de valoraciones de productos
 ├── css/                # Archivos CSS
 │   ├── style.css       # Estilos adicionales
 │   ├── input.css       # Archivo fuente de Tailwind CSS
 │   └── output.css      # Archivo generado por Tailwind CSS
+├── img/                # Imágenes del proyecto
 ├── node_modules/       # Dependencias de Node.js
 ├── resources/          # Archivos adicionales (como el script SQL)
 │   └── tables.sql    # Archivo SQL para configurar la base de datos
@@ -64,8 +66,8 @@ Antes de comenzar, asegúrate de tener instalados los siguientes programas y her
 
 ## 💻 Despliegue del proyecto desde la terminal de VSCode  
 
-1. Asegúrate de iniciar la terminal en la carpeta principal del proyecto, por ejemplo:  
-   **`UT6_SP1_RamírezLucesCésarMiguel`**.  
+1. Asegúrate de iniciar la terminal en la carpeta principal del proyecto, ya que existen rutas en la base de datos (imágenes) con este nombre de carpeta:  
+   **`PHP-TailwindCSS-Valorations`**.
 
 2. Ejecuta este comando en la terminal para cargar las dependencias de Tailwind CSS:  
    ```bash
@@ -83,7 +85,7 @@ Antes de comenzar, asegúrate de tener instalados los siguientes programas y her
 4. Luego, abre **XAMPP** y enciende los servicios de **MySQL** y **Apache**.  
 
 5. Accede al proyecto en tu navegador desde:  
-   **`http://localhost/UT6_SP1_RamírezLucesCésarMiguel/app/index.php`**.  
+   **`http://localhost/PHP-TailwindCSS-Valorations/app/index.php`**.
 
 ---
 
@@ -94,7 +96,7 @@ Antes de comenzar, asegúrate de tener instalados los siguientes programas y her
 En el archivo `app/db.php`, asegúrate de configurar correctamente las credenciales para la conexión:  
 ```php
 $host = 'localhost';
-$dbname = 'productos';
+$dbname = 'valorations';
 $username = 'root';
 $password = ''; // Cambia según tu configuración
 ```
@@ -105,6 +107,8 @@ Los datos de acceso son:
 Usuario: admin
 Contraseña: 123456
 ```
+
+Existen más usuarios creados en la base de datos, pero no se han incluido en este proyecto para simplificar el desarrollo.
 
 ---
 
