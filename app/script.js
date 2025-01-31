@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 document.querySelectorAll('.vote-button').forEach(button => {
     button.addEventListener('click', async function(event) {
         event.preventDefault(); // Evita el envío tradicional del formulario
@@ -59,3 +60,10 @@ function createResponseDiv(form) {
     form.appendChild(responseDiv);
     return responseDiv;
 }
+=======
+    document.onsubmit = function (e) {
+        e.preventDefault();
+
+        
+    };
+>>>>>>> 467da9face506698ca9a92231ce3e2e1c68defcd
