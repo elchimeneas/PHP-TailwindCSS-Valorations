@@ -9,18 +9,19 @@ include_once('db.php');
 
 
 if (isset($_SESSION['isLogged']) && $_SESSION['isLogged'] === 'unlogged') {
-    die(header('location: ./index.php'));
+    header('location: ./index.php');
+    exit;
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['logout'])) {
     $_SESSION['isLogged'] = 'unlogged';
     session_unset();
     session_destroy();
-    die(header('location: ./index.php'));
+    header('location: ./index.php');
+    exit;
 }
 
 if ($_SESSION['isLogged'] === 'logged' && isset($_SESSION['username'])) {
-<<<<<<< HEAD
     $sql_user = "SELECT * FROM users WHERE username = ?";
     $gsent_user = $db_PDO->prepare($sql_user);
     $gsent_user->execute([$_SESSION['username']]);
@@ -34,23 +35,6 @@ if ($_SESSION['isLogged'] === 'logged' && isset($_SESSION['username'])) {
 }
 
 
-=======
-    try {
-        $sql_user = "SELECT * FROM users WHERE username = ?";
-        $gsent_user = $db_PDO->prepare($sql_user);
-        $gsent_user->execute([$_SESSION['username']]);
-    
-        $result = $gsent_user->fetch(PDO::FETCH_ASSOC);
-    
-        if ($result) {
-            $_SESSION['profile_pic'] = $result['profile_pic'];
-            $_SESSION['userId'] = $result['id'];
-        }
-    } catch(PDOException $e){
-        die('Error: ' . $e->getMessage());
-    }
-}
->>>>>>> 467da9face506698ca9a92231ce3e2e1c68defcd
 
 
 ?>
@@ -93,6 +77,7 @@ if ($_SESSION['isLogged'] === 'logged' && isset($_SESSION['username'])) {
         <table class="table text-center">
             <thead class="">
                 <th>ID</th>
+                <th>Product Image</th>
                 <th>Name</th>
                 <th>Average</th>
                 <th>Your valoration</th>
@@ -110,6 +95,7 @@ if ($_SESSION['isLogged'] === 'logged' && isset($_SESSION['username'])) {
                     if ($result): foreach ($result as $product): ?>
                             <tr>
                                 <td><?php echo $product['id']; ?></td>
+                                <td class="flex flex-col items-center justify-center"><?php echo "<img src='" . $product['image'] . "' alt='Product image' class='w-[100px] text-center'>"; ?></td>
                                 <td><?php echo $product['name']; ?></td>
                                 <td id="averageRate-<?php echo $product['id']; ?>">
                                     Average: <?php
@@ -118,7 +104,6 @@ if ($_SESSION['isLogged'] === 'logged' && isset($_SESSION['username'])) {
                                                 : "Sin votos";
                                             ?>
                                 </td>
-<<<<<<< HEAD
                                 <td id="userVote-<?php echo $product['id']; ?>"><?php
                                     try {
 
@@ -133,12 +118,8 @@ if ($_SESSION['isLogged'] === 'logged' && isset($_SESSION['username'])) {
                                         die('Error' . $e->getMessage());
                                     }
                                     ?></td>
-=======
-
-                                <td>Average value</td>
->>>>>>> 467da9face506698ca9a92231ce3e2e1c68defcd
                                 <td>
-                                    <form method="POST" class="flex gap-4 items-center justify-center">
+                                    <form action="" method="POST" class="flex gap-4 items-center justify-center">
                                         <div class="rating flex gap-1 text-yellow cursor-pointer" data-product-id="<?php echo $product['id']; ?>">
                                             <i class="fa-solid fa-star text-[24px]" data-value="1"></i>
                                             <i class="fa-solid fa-star text-[24px]" data-value="2"></i>
@@ -155,28 +136,16 @@ if ($_SESSION['isLogged'] === 'logged' && isset($_SESSION['username'])) {
                 } catch (PDOException $e) {
                     echo "<script>console.log('Error: '" . $e->getMessage() . " );</script>";
                 }
-<<<<<<< HEAD
 
                 ?>
-=======
-            ?>
-
-            <p id="response"></p>
->>>>>>> 467da9face506698ca9a92231ce3e2e1c68defcd
             </tbody>
         </table>
         <p id="response"></p>
     </section>
 </body>
 
-<<<<<<< HEAD
 <script>
     const ratings = document.querySelectorAll(".rating");
-=======
-    <script src="./script.js"></script>
-    <script>
-        const ratings = document.querySelectorAll('.rating');
->>>>>>> 467da9face506698ca9a92231ce3e2e1c68defcd
 
     ratings.forEach((rating) => {
         const stars = rating.querySelectorAll("i"); // Estrellas para este producto

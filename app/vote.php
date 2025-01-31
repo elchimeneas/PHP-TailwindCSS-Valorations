@@ -5,25 +5,16 @@ include_once('db.php');
 
 header('Content-Type: application/json');
 
-$errors = [];
-
 if (!isset($_SESSION['isLogged']) || $_SESSION['isLogged'] !== 'logged' || !isset($_SESSION['userId'])) {
     echo json_encode(['error' => 'No estás autenticado.']);
     exit;
 }
 
-<<<<<<< HEAD
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['vote'], $_POST['productId'])) {
     // Validamos y sanitizamos los datos
     $userId = $_SESSION['userId'];
     $productId = filter_var($_POST['productId'], FILTER_VALIDATE_INT);
     $userRate = filter_var($_POST['vote'], FILTER_VALIDATE_FLOAT);
-=======
-$userId = $_SESSION['userId'];
-$data = json_decode(file_get_contents('php://input'), true);
-$productId = filter_var($_POST['productId'], FILTER_VALIDATE_INT);
-$userRate = filter_var($_POST['vote'], FILTER_VALIDATE_FLOAT);
->>>>>>> 467da9face506698ca9a92231ce3e2e1c68defcd
 
     $response = ['sucess' => false, 'message' => '', 'averageRate' => 0];
 

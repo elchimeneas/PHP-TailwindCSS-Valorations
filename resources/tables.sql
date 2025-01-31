@@ -19,11 +19,11 @@ VALUES
 create table products (
     id int primary key auto_increment,
     name varchar(50) not null,
+    image varchar(250) not null,
     totalRate float default 0,
     totalVotes int default 0
 );
 
-<<<<<<< HEAD
 INSERT INTO products (name, image, totalRate, totalVotes) 
 VALUES 
 ('Chanel No. 5', '/PHP-TailwindCSS-Valorations/img/products/chanel.webp', 1, 1),
@@ -31,9 +31,6 @@ VALUES
 ('Gucci Bloom', '/PHP-TailwindCSS-Valorations/img/products/gucci.webp', 1, 1),
 ('Yves Saint Laurent Black Opium', '/PHP-TailwindCSS-Valorations/img/products/yves.webp', 1, 1),
 ('Calvin Klein Eternity', '/PHP-TailwindCSS-Valorations/img/products/calvin.webp', 1, 1);
-=======
-insert into products (name, totalRate, totalVotes) values ('Calvin Klein One', 1, 1);
->>>>>>> 467da9face506698ca9a92231ce3e2e1c68defcd
 
 create table votes(
     id int primary key auto_increment,
