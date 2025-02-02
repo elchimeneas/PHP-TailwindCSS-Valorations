@@ -30,7 +30,7 @@ document.querySelectorAll('.vote-button').forEach(button => {
 
                 // Verifica que el elemento promedio exista antes de intentar actualizarlo
                 if (averageRateElement) {
-                    console.log("Elemento encontrado:", averageRateElement);  // Verifica que se encuentre el elemento
+                    console.log("Found average rate element:", averageRateElement);  // Verifica que se encuentre el elemento
                     averageRateElement.innerText = `Average: ${result.averageRate}`;
                 } else {
                     console.log("The average element was not found.");
@@ -39,7 +39,10 @@ document.querySelectorAll('.vote-button').forEach(button => {
                     // Actualizar la valoración del usuario
                 const userVoteElement = document.getElementById(`userVote-${productId}`);
                 if (userVoteElement) {
+                    console.log("Found user vote element:", userVoteElement);  // Verifica que se encuentre el elemento
                     userVoteElement.innerText = result.userVote;
+                } else {
+                    console.log("The user vote element was not found.");
                 }
             } else {
                 responseDiv.innerHTML = `<p style="color: red;">${result.message}</p>`;

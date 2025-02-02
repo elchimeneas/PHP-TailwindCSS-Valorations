@@ -101,7 +101,7 @@ if ($_SESSION['isLogged'] === 'logged' && isset($_SESSION['username'])) {
                                     Average: <?php
                                             echo ($product['totalVotes'] > 0)
                                                 ? round($product['totalRate'] / $product['totalVotes'], 2)
-                                                : "Sin votos";
+                                                : "Without votes";
                                             ?>
                                 </td>
                                 <td id="userVote-<?php echo $product['id']; ?>"><?php

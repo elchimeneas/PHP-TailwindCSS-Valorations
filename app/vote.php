@@ -6,7 +6,7 @@ include_once('db.php');
 header('Content-Type: application/json');
 
 if (!isset($_SESSION['isLogged']) || $_SESSION['isLogged'] !== 'logged' || !isset($_SESSION['userId'])) {
-    echo json_encode(['error' => 'No estás autenticado.']);
+    echo json_encode(['error' => "You're not authenticated."]);
     exit;
 }
 
@@ -16,10 +16,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['vote'], $_POST['produ
     $productId = filter_var($_POST['productId'], FILTER_VALIDATE_INT);
     $userRate = filter_var($_POST['vote'], FILTER_VALIDATE_FLOAT);
 
-    $response = ['sucess' => false, 'message' => '', 'averageRate' => 0];
+    $response = ['sucess' => false, 'message' => '', 'averageRate' => 0, 'userVote' => 0];
 
     if (!$productId || !$userRate || $userRate < 0 || $userRate > 3) {
-        $response['message'] = 'Datos del voto inválidos';
+        $response['message'] = 'Vote data invalid.';
         echo json_encode($response);
         exit;
     }
@@ -31,7 +31,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['vote'], $_POST['produ
         $stmt_check_vote->execute([$productId, $userId]);
 
         if ($stmt_check_vote->rowCount() > 0) {
-            $response['message'] = 'Ya has votado este producto.';
+            $response['message'] = "You've already voted this product.";
         } else {
             // Insertamos un nuevo voto porque no existe ninguno previo
             $sql_insert_vote = "INSERT INTO votes (rate, productId, userId) VALUES (?, ?, ?)";
@@ -59,12 +59,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['vote'], $_POST['produ
             $userVote = $stmt_user_vote->fetch(PDO::FETCH_ASSOC)['rate'];
 
             $response['success'] = true;
-            $response['message'] = 'Voto registrado correctamente.';
+            $response['message'] = 'Vote registered succesfully.';
             $response['averageRate'] = round($averageRate, 2);
             $response['userVote'] = $userVote;
         }
     } catch (PDOException $e) {
-        $response['message'] = 'Error en la base de datos: ' . $e->getMessage();
+        $response['message'] = 'Database error: ' . $e->getMessage();
     }
 
     echo json_encode($response);
