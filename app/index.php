@@ -90,7 +90,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                             </ul>
                     <?php endforeach;
                     endif; ?>
-                    <button class="disabled bg-yellow font-bold uppercase text-white p-3 rounded-[0.5rem] hover:bg-dark-gray transition duration-500" type="submit">Enter</button>
+                    <button class="bg-yellow font-bold uppercase text-white p-3 rounded-[0.5rem] hover:bg-dark-gray transition duration-500" type="submit">Enter</button>
                 </form>
             </div>
         </section>
